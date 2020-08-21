@@ -1,0 +1,175 @@
+<!-- shakeable magic 8ball -->
+<!-- By William Huddleston (YGOLG#8005, Ironfacebuster) -->
+
+<!-- if you use this code, you better credit me! -->
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <div class="center">
+        <div id="zoom" style="width:fit-content;height:fit-content">
+            <div class="center" style="text-align: center;" id="ballCenter">
+                <div class="ball" id="ball">
+                    <div class="answer">
+                        <div class="center">
+                            <div class="triangle" id="tri">
+                                <div class="center">
+                                    <div id="an" class="answertext"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script>
+    var o = offset(document.getElementById("ballCenter"))
+
+    var lastx = o.left,
+        lasty = o.top;
+
+    var shaken = false;
+
+    $("#an").fadeOut();
+    $("#tri").fadeOut();
+
+    answers = ["It is certain.", "It is decidedly so.", "Without a doubt.", " Yes - definitely.", "You may rely on it.",
+        "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.",
+        "Reply hazy, try again.", "Ask again later.", "Better not tell you now.", "Cannot predict now.",
+        "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no.",
+        "Outlook not so good.", "Very doubtful."
+    ];
+
+    function shake() {
+        $("#an").fadeOut("slow", "swing");
+        $("#tri").fadeOut("slow", "swing", () => {
+            fadein()
+        });
+
+        $("#ballCenter").removeClass("nonZoomed").addClass("zoomed");
+        $("#an").text(answers[Math.round(Math.random() * answers.length)]);
+
+        shaken = false;
+    }
+
+    function fadein() {
+        $("#an").fadeIn("slow", "swing");
+        $("#tri").fadeIn("slow", "swing");
+    }
+
+    function offset(el) {
+        var rect = el.getBoundingClientRect(),
+            scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+            scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        return {
+            top: rect.top + scrollTop,
+            left: rect.left + scrollLeft
+        }
+    }
+
+    var mouseHeld = false;
+
+    $(document).mousedown(function () {
+        $("#an").fadeOut("slow", "swing");
+        $("#ballCenter").removeClass("zoomed").addClass("nonZoomed");
+        $("#tri").fadeOut("slow", "swing");
+        mouseHeld = true;
+    }).mouseup(function () {
+        if (shaken)
+            shake();
+        mouseHeld = false;
+    }).mousemove(function () {
+        if (mouseHeld) {
+            $("#ballCenter").position({
+                my: "center",
+                of: event,
+                collision: "fit"
+            });
+        }
+    })
+
+    setInterval(function () {
+        if (mouseHeld) {
+
+            o = offset(document.getElementById("ballCenter"))
+
+            var x = o.left,
+                y = o.top;
+
+            if (Math.abs(x - lastx) > 150 || Math.abs(y - lasty) > 75)
+                shaken = true
+
+            lastx = x;
+            lasty = y;
+        }
+    }, 150);
+</script>
+
+<style>
+    .center {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        /* bring your own prefixes */
+        transform: translate(-50%, -50%);
+    }
+
+    .ball {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background-color: black;
+    }
+
+    .answer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        /* bring your own prefixes */
+        transform: translate(-50%, -70%);
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background-color: black;
+        box-shadow: 4px 4px white;
+        color: white;
+        font-family: 'Courier New', Courier, monospace;
+        font-weight: bold;
+    }
+
+    .answertext {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        width: 48px;
+        height: 30px;
+        font-size: 50%;
+        vertical-align: middle;
+    }
+
+    .triangle {
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 0 50px 86.6px 50px;
+        border-color: transparent transparent #007bff transparent;
+    }
+
+    .zoomed {
+        zoom: 2;
+        -moz-transform: scale(2);
+    }
+
+    .nonZoomed {
+        zoom: 1;
+        -moz-transform: scale(1);
+    }
+</style>
